@@ -1,8 +1,8 @@
 import random
-import math
-import csv
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from matplotlib.colors import ListedColormap
 
 #state
 S, I , R = 0, 1, 2
@@ -14,7 +14,7 @@ HEIGHT = 50
 WIDTH = 50
 
 
-def init_board():
+def initial_board():
     board = [[S for _ in range(WIDTH)] for _ in range(HEIGHT)]
     y = random.randint(0, HEIGHT - 1)
     x = random.randint(0, WIDTH - 1)
@@ -101,8 +101,33 @@ def plot_sir(filename="sir.csv"):
     plt.savefig("sir_graph.png")  # ← 追加
     plt.show()
 
+def animate_sir(initial_board):
+    board = initial_board
+
+    fig, ax = plt.subplots()
+    
+    #color(S:white, I:red, R:blue)
+    cmap = ListedColormap(["white", "red", "blue"])
+    im = ax.imshow(board, cmap=cmap, vmin=0, vmax=2)
+
+    def update(frame):
+        nonlocal board
+        board = update_board(board)
+        im.set_array(board)
+        return [im]
+    
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=200,
+        interval=100
+    )
+    plt.title("SIR Simulation")
+    ani.save("sir_animation.gif", writer="pillow")
+    plt.show()
+
 def main():
-    board = init_board()
+    board = initial_board()
 
     with open("sir.csv", "w") as f:
         f.write("step,S,I,R\n")
@@ -121,5 +146,7 @@ def main():
 
     plot_sir("sir.csv")
     
+    
 if __name__ == "__main__":
     main()
+    animate_sir()
